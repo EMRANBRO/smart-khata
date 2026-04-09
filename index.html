@@ -374,13 +374,23 @@ import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, query, or
 // ┌─────────────────────────────────────────┐
 // │  🔥  PASTE YOUR FIREBASE CONFIG HERE    │
 // └─────────────────────────────────────────┘
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey:            "YOUR_API_KEY",
-  authDomain:        "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId:         "YOUR_PROJECT_ID",
-  storageBucket:     "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId:             "YOUR_APP_ID"
+  apiKey: "AIzaSyDPzcKnSXLesESmgEjyx8GyoCrrRaDZWHo",
+  authDomain: "smart-khata-3a58e.firebaseapp.com",
+  projectId: "smart-khata-3a58e",
+  storageBucket: "smart-khata-3a58e.firebasestorage.app",
+  messagingSenderId: "219820957653",
+  appId: "1:219820957653:web:cf06a175995b0690e7275c"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
 };
 // ──────────────────────────────────────────
 
