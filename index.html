@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Smart Khata - স্মার্ট খাতা</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1a5fa8">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Smart Khata">
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary: #1a5fa8;
+  --primary-light: #2e86d4;
+  --primary-dark: #114080;
+  --danger: #c0392b;
+  --danger-light: #fdecea;
+  --success: #1a7a40;
+  --success-light: #e8f8ee;
+  --deposit: #7c3aed;
+  --deposit-light: #ede9fe;
+  --warning: #c47d0e;
+  --warning-light: #fff8e1;
+  --bg: #eef2fb;
+  --card: #ffffff;
+  --text: #1a1a2e;
+  --text2: #3a3a5c;
+  --text3: #8e8ea8;
+  --border: #dde1ef;
+  --sh1: 0 4px 20px rgba(30,40,80,0.09);
+  --sh2: 0 2px 8px rgba(30,40,80,0.06);
+  --r: 16px; --r2: 10px;
+}
+[data-theme="dark"] {
+  --primary: #3b82f6; --primary-light: #60a5fa; --primary-dark: #2563eb;
+  --danger: #f87171; --danger-light: #3f1515;
+  --success: #34d399; --success-light: #0d2d22;
+  --deposit: #a78bfa; --deposit-light: #2d1f4a;
+  --warning: #fbbf24; --warning-light: #3a2800;
+  --bg: #1a1f2e; --card: #262c3e; --text: #f1f5f9;
+  --text2: #94a3b8; --text3: #475569; --border: #334155;
+  --sh1: 0 4px 20px rgba(0,0,0,0.35); --sh2: 0 2px 8px rgba(0,0,0,0.25);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { font-family: 'Hind Siliguri', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; transition: background .3s, color .3s; }
+
+/* HEADER */
+.hdr { background: linear-gradient(135deg,#0e2d5e,#1a5fa8 60%,#2e86d4); padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: 0 3px 14px rgba(0,0,0,0.2); }
+.hdr-l { display: flex; align-items: center; gap: 10px; }
+.hdr-l span { font-size: 26px; }
+.hdr-t h1 { color: #fff; font-size: 1.18rem; font-weight: 700; }
+.hdr-t p { color: rgba(255,255,255,.7); font-size: .68rem; }
+.tog { background: rgba(255,255,255,.15); border: 1.5px solid rgba(255,255,255,.28); border-radius: 50px; width: 46px; height: 26px; cursor: pointer; position: relative; transition: background .3s; }
+.tog-k { position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; font-size: 11px; display: flex; align-items: center; justify-content: center; transition: left .3s; box-shadow: 0 1px 4px rgba(0,0,0,.2); }
+[data-theme="dark"] .tog-k { left: 23px; }
+
+/* MAIN */
+.main { padding: 14px 13px 96px; max-width: 500px; margin: 0 auto; }
+
+/* SEARCH */
+.srch { position: relative; margin-bottom: 13px; }
+.srch input { width: 100%; padding: 11px 14px 11px 40px; border-radius: 50px; border: 1.5px solid var(--border); background: var(--card); color: var(--text); font-family: inherit; font-size: .93rem; outline: none; box-shadow: var(--sh2); transition: border .2s; }
+.srch input:focus { border-color: var(--primary); }
+.srch .si { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 16px; pointer-events: none; }
+.srch input::placeholder { color: var(--text3); }
+
+/* SUMMARY */
+.sum-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 7px; margin-bottom: 16px; }
+.sum-card { background: var(--card); border-radius: var(--r2); padding: 11px 7px 9px; text-align: center; box-shadow: var(--sh2); border: 1.5px solid var(--border); }
+.sum-card .si2 { font-size: 17px; margin-bottom: 3px; }
+.sum-card .sl { font-size: .64rem; color: var(--text3); margin-bottom: 2px; }
+.sum-card .sv { font-size: .9rem; font-weight: 700; }
+.sc-loan .sv { color: var(--danger); }
+.sc-paid .sv { color: var(--success); }
+.sc-due .sv { color: var(--warning); }
+
+/* SECTION */
+.sec-ttl { font-size: .72rem; font-weight: 700; color: var(--text3); letter-spacing: .07em; text-transform: uppercase; margin-bottom: 9px; padding-left: 2px; }
+
+/* CUSTOMER CARD */
+.c-list { display: flex; flex-direction: column; gap: 9px; }
+.c-card { background: var(--card); border-radius: var(--r); box-shadow: var(--sh2); border: 1.5px solid var(--border); overflow: hidden; animation: fi .3s ease both; transition: border-color .2s; }
+.c-card.open { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(26,95,168,.12), var(--sh1); }
+@keyframes fi { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+
+/* CARD TOP */
+.c-top { display: flex; align-items: center; justify-content: space-between; padding: 13px 13px 0; cursor: pointer; }
+.c-info { display: flex; align-items: center; gap: 10px; }
+.ava { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg,#114080,#2e86d4); display: flex; align-items: center; justify-content: center; font-size: 1.05rem; font-weight: 700; color: #fff; flex-shrink: 0; }
+.c-name { font-size: .98rem; font-weight: 600; }
+.c-phone { font-size: .75rem; color: var(--text3); margin-top: 1px; }
+.c-right { display: flex; align-items: center; gap: 8px; }
+.arr { font-size: 18px; color: var(--text3); transition: transform .25s; }
+.c-card.open .arr { transform: rotate(180deg); }
+.btn-del { width: 30px; height: 30px; border-radius: 50%; border: none; background: var(--danger-light); color: var(--danger); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .2s, transform .15s; }
+.btn-del:active { transform: scale(.88); }
+
+/* CARD STATS */
+.c-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; background: var(--bg); margin: 10px 13px 13px; border-radius: var(--r2); padding: 8px; }
+[data-theme="dark"] .c-stats { background: rgba(0,0,0,.2); }
+.st-item { text-align: center; }
+.st-lbl { font-size: .62rem; color: var(--text3); margin-bottom: 1px; }
+.st-val { font-size: .88rem; font-weight: 700; }
+.stv-loan { color: var(--danger); }
+.stv-paid { color: var(--success); }
+.stv-dep { color: var(--deposit); }
+.stv-due { color: var(--warning); }
+.stv-zero { color: var(--success); }
+
+/* DETAIL PANEL */
+.d-panel { border-top: 1.5px solid var(--border); animation: fi .22s ease both; }
+.d-hdr { background: linear-gradient(135deg,#114080,#1a5fa8); padding: 11px 13px; display: flex; align-items: center; justify-content: space-between; }
+.d-hdr h3 { color: #fff; font-size: .9rem; }
+.d-hdr span { color: rgba(255,255,255,.75); font-size: .75rem; }
+.d-acts { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; padding: 11px 13px 0; }
+.btn-act { border: none; border-radius: var(--r2); padding: 10px 4px; font-family: inherit; font-size: .78rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; transition: transform .15s, opacity .15s; box-shadow: var(--sh2); }
+.btn-act:active { transform: scale(.95); opacity: .85; }
+.ba-loan { background: linear-gradient(135deg,#c0392b,#e74c3c); color: #fff; }
+.ba-pay { background: linear-gradient(135deg,#059669,#10b981); color: #fff; }
+.ba-dep { background: linear-gradient(135deg,#6d28d9,#8b5cf6); color: #fff; }
+
+/* TX LIST */
+.tx-list { padding: 10px 13px 13px; display: flex; flex-direction: column; gap: 6px; }
+.tx-empty { text-align: center; color: var(--text3); font-size: .82rem; padding: 12px 0; }
+.tx-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; border-radius: var(--r2); border: 1.5px solid var(--border); background: var(--bg); animation: fi .2s both; }
+[data-theme="dark"] .tx-item { background: rgba(0,0,0,.15); }
+.tx-l { display: flex; align-items: center; gap: 8px; }
+.tx-ico { font-size: 16px; }
+.tx-type { font-size: .77rem; font-weight: 600; }
+.tx-date { font-size: .68rem; color: var(--text3); margin-top: 1px; }
+.tx-amt { font-size: .9rem; font-weight: 700; }
+.tx-del { width: 26px; height: 26px; border-radius: 50%; border: none; background: var(--danger-light); color: var(--danger); font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .2s, transform .15s; flex-shrink: 0; margin-left: 8px; }
+.tx-del:active { transform: scale(.85); background: var(--danger); color: #fff; }
+.tx-r { display: flex; align-items: center; gap: 0; }
+.txi-loan .tx-type, .txi-loan .tx-amt { color: var(--danger); }
+.txi-payment .tx-type, .txi-payment .tx-amt { color: var(--success); }
+.txi-deposit .tx-type, .txi-deposit .tx-amt { color: var(--deposit); }
+.txi-withdraw .tx-type, .txi-withdraw .tx-amt { color: var(--warning); }
+
+/* BALANCE ROW */
+.bal-row { display: flex; justify-content: space-between; align-items: center; margin: 0 13px 11px; padding: 9px 12px; border-radius: var(--r2); background: var(--warning-light); border: 1.5px solid var(--warning); }
+[data-theme="dark"] .bal-row { background: var(--warning-light); }
+.bal-row.settled { background: var(--success-light); border-color: var(--success); }
+.bal-row.dep-bal { background: var(--deposit-light); border-color: var(--deposit); }
+.bal-lbl { font-size: .75rem; font-weight: 600; color: var(--text2); }
+.bal-val { font-size: 1rem; font-weight: 700; }
+.bal-row .bal-val { color: var(--warning); }
+.bal-row.settled .bal-val { color: var(--success); }
+.bal-row.dep-bal .bal-val { color: var(--deposit); }
+
+/* MODALS */
+.m-ov { position: fixed; inset: 0; background: rgba(0,0,0,.52); display: flex; align-items: flex-end; justify-content: center; z-index: 200; animation: oi .2s both; }
+@keyframes oi { from { opacity:0; } to { opacity:1; } }
+.m-box { background: var(--card); border-radius: var(--r) var(--r) 0 0; padding: 20px 16px 28px; width: 100%; max-width: 500px; animation: su .28s cubic-bezier(.4,0,.2,1) both; max-height: 92vh; overflow-y: auto; border-top: 3px solid var(--primary); }
+@keyframes su { from { transform:translateY(48px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+.m-ttl { font-size: 1.05rem; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 7px; }
+.m-fld { margin-bottom: 12px; }
+.m-fld label { display: block; font-size: .78rem; font-weight: 600; color: var(--text2); margin-bottom: 4px; }
+.m-fld input, .m-fld select { width: 100%; padding: 11px 12px; border-radius: var(--r2); border: 1.5px solid var(--border); background: var(--bg); color: var(--text); font-family: inherit; font-size: .96rem; outline: none; transition: border .2s; }
+.m-fld input:focus, .m-fld select:focus { border-color: var(--primary); }
+.m-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 16px; }
+.btn-can { padding: 12px; border-radius: var(--r2); border: 1.5px solid var(--border); background: var(--bg); color: var(--text2); font-family: inherit; font-size: .9rem; font-weight: 600; cursor: pointer; }
+.btn-ok { padding: 12px; border-radius: var(--r2); border: none; background: linear-gradient(135deg,#114080,#2e86d4); color: #fff; font-family: inherit; font-size: .9rem; font-weight: 600; cursor: pointer; box-shadow: 0 3px 10px rgba(26,95,168,.28); transition: opacity .2s, transform .15s; }
+.btn-ok:active { transform: scale(.97); }
+.btn-ok.danger { background: linear-gradient(135deg,#c0392b,#e74c3c); box-shadow: 0 3px 10px rgba(192,57,43,.28); }
+
+/* CONFIRM */
+.m-ov.conf { align-items: center; }
+.conf-box { border-radius: var(--r); max-height: unset; padding: 24px 20px; text-align: center; width: calc(100% - 28px); max-width: 300px; animation: pi .22s ease both; }
+@keyframes pi { from { transform:scale(.88); opacity:0; } to { transform:scale(1); opacity:1; } }
+.conf-ico { font-size: 38px; margin-bottom: 9px; }
+.conf-ttl { font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
+.conf-msg { font-size: .84rem; color: var(--text2); margin-bottom: 16px; line-height: 1.5; }
+.conf-btns { display: flex; gap: 9px; }
+
+/* FAB */
+.fab { position: fixed; bottom: 22px; right: 16px; width: 54px; height: 54px; border-radius: 50%; background: linear-gradient(135deg,#114080,#2e86d4); border: none; color: #fff; font-size: 24px; box-shadow: 0 5px 18px rgba(26,95,168,.42); cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 50; transition: transform .2s; }
+.fab:active { transform: scale(.92); }
+
+/* EMPTY / NO-RESULT */
+.empty { text-align: center; padding: 34px 14px; }
+.empty .ei { font-size: 48px; margin-bottom: 10px; opacity: .5; }
+.empty h3 { font-size: 1rem; font-weight: 600; color: var(--text2); margin-bottom: 4px; }
+.empty p { font-size: .82rem; color: var(--text3); }
+.no-res { text-align: center; color: var(--text3); font-size: .85rem; padding: 20px; }
+
+/* TOAST */
+.toast { position: fixed; top: 64px; left: 50%; transform: translateX(-50%) translateY(-14px); background: linear-gradient(135deg,#114080,#1a5fa8); color: #fff; padding: 9px 18px; border-radius: 50px; font-size: .82rem; font-weight: 500; box-shadow: 0 4px 14px rgba(0,0,0,.2); z-index: 300; opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; white-space: nowrap; max-width: 88vw; text-overflow: ellipsis; overflow: hidden; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* TYPE BADGE */
+.type-tag { display: inline-block; font-size: .6rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-left: 5px; vertical-align: middle; }
+.tag-loan { background: var(--danger-light); color: var(--danger); }
+.tag-deposit { background: var(--deposit-light); color: var(--deposit); }
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-l">
+    <span>📒</span>
+    <div class="hdr-t"><h1>Smart Khata</h1><p>স্মার্ট ডিজিটাল খাতা</p></div>
+  </div>
+  <button class="tog" id="togBtn"><div class="tog-k" id="togK">☀️</div></button>
+</div>
+
+<div class="main">
+  <div class="srch"><span class="si">🔍</span><input type="text" id="srchIn" placeholder="গ্রাহক খুঁজুন..." oninput="render()"></div>
+  <div class="sum-row">
+    <div class="sum-card sc-loan"><div class="si2">💸</div><div class="sl">মোট পাওনা</div><div class="sv" id="sTotalDue">৳০</div></div>
+    <div class="sum-card sc-paid"><div class="si2">✅</div><div class="sl">পরিশোধ হয়েছে</div><div class="sv" id="sTotalPaid">৳০</div></div>
+    <div class="sum-card sc-due"><div class="si2">💰</div><div class="sl">মোট জমা</div><div class="sv" id="sTotalDep">৳০</div></div>
+  </div>
+  <div class="sec-ttl">গ্রাহক তালিকা</div>
+  <div class="c-list" id="cList"></div>
+</div>
+
+<button class="fab" id="fabBtn">➕</button>
+<div class="toast" id="toast"></div>
+
+<!-- ADD CUSTOMER -->
+<div class="m-ov" id="mAddC" style="display:none">
+  <div class="m-box">
+    <div class="m-ttl">👤 গ্রাহক যোগ করুন</div>
+    <div class="m-fld"><label>নাম *</label><input type="text" id="iName" placeholder="গ্রাহকের নাম লিখুন"></div>
+    <div class="m-fld"><label>ফোন নম্বর</label><input type="tel" id="iPhone" placeholder="01XXXXXXXXX"></div>
+    <div class="m-btns">
+      <button class="btn-can" onclick="closeM('mAddC')">বাতিল</button>
+      <button class="btn-ok" onclick="addCustomer()">✅ যোগ করুন</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD TRANSACTION -->
+<div class="m-ov" id="mAddTx" style="display:none">
+  <div class="m-box">
+    <div class="m-ttl" id="txMTitle">💸 লেনদেন যোগ করুন</div>
+    <div class="m-fld"><label>পরিমাণ (টাকা) *</label><input type="number" id="txAmt" placeholder="০" min="1" inputmode="numeric"></div>
+    <div class="m-fld"><label>তারিখ</label><input type="date" id="txDate"></div>
+    <div class="m-fld"><label>নোট (ঐচ্ছিক)</label><input type="text" id="txNote" placeholder="কারণ বা বিবরণ"></div>
+    <div class="m-btns">
+      <button class="btn-can" onclick="closeM('mAddTx')">বাতিল</button>
+      <button class="btn-ok" id="txOkBtn" onclick="addTx()">✅ যোগ করুন</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM -->
+<div class="m-ov conf" id="mConf" style="display:none">
+  <div class="m-box conf-box">
+    <div class="conf-ico">🗑️</div>
+    <div class="conf-ttl">গ্রাহক মুছবেন?</div>
+    <div class="conf-msg" id="confMsg">এই গ্রাহক এবং সকল লেনদেন মুছে যাবে।</div>
+    <div class="conf-btns">
+      <button class="btn-can" style="flex:1" onclick="closeM('mConf')">না, থাকুক</button>
+      <button class="btn-ok danger" style="flex:1" id="confOk">হ্যাঁ, মুছুন</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── DATA ─────────────────────────────────────────────────────────────────────
+let db = JSON.parse(localStorage.getItem('sk_v3') || '[]');
+let openId = null; // which customer panel is open
+let curTxType = 'loan'; // loan | payment | deposit | withdraw
+let curCid = null;
+let pendingDel = null;
+
+const save = () => localStorage.setItem('sk_v3', JSON.stringify(db));
+const openM = id => document.getElementById(id).style.display = 'flex';
+const closeM = id => document.getElementById(id).style.display = 'none';
+
+// close on overlay tap
+document.querySelectorAll('.m-ov').forEach(o =>
+  o.addEventListener('click', e => { if (e.target === o) o.style.display = 'none'; })
+);
+
+// ── THEME ─────────────────────────────────────────────────────────────────────
+let theme = localStorage.getItem('sk_theme') || 'light';
+applyTheme(theme);
+document.getElementById('togBtn').onclick = () => {
+  theme = theme === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('sk_theme', theme);
+  applyTheme(theme);
+};
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  document.getElementById('togK').textContent = t === 'dark' ? '🌙' : '☀️';
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2400);
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+const BN = n => String(n).replace(/[0-9]/g, d => '০১২৩৪৫৬৭৮৯'[d]);
+const money = n => '৳' + BN(Math.abs(Number(n)).toLocaleString('en'));
+const ini = s => (s || '?').trim()[0].toUpperCase();
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,5);
+const today = () => new Date().toISOString().split('T')[0];
+function fmtD(d) {
+  if (!d) return '';
+  return new Date(d + 'T00:00:00').toLocaleDateString('bn-BD', { day:'numeric', month:'short', year:'numeric' });
+}
+
+// ── CALC ──────────────────────────────────────────────────────────────────────
+// Returns: loanDue (আমরা পাবো), depositBal (কাস্টমার জমা রেখেছে), totalPaid
+function calc(c) {
+  let loanTotal = 0, loanPaid = 0, depositTotal = 0, depositWithdrawn = 0;
+  (c.tx || []).forEach(t => {
+    if (t.type === 'loan')     loanTotal      += +t.amt;
+    if (t.type === 'payment')  loanPaid       += +t.amt;
+    if (t.type === 'deposit')  depositTotal   += +t.amt;
+    if (t.type === 'withdraw') depositWithdrawn += +t.amt;
+  });
+  return {
+    loanTotal, loanPaid,
+    loanDue: Math.max(0, loanTotal - loanPaid),    // আমরা পাবো
+    depositTotal, depositWithdrawn,
+    depositBal: Math.max(0, depositTotal - depositWithdrawn) // জমা বাকি
+  };
+}
+
+// ── SUMMARY ───────────────────────────────────────────────────────────────────
+function updateSummary() {
+  let totalDue = 0, totalPaid = 0, totalDep = 0;
+  db.forEach(c => {
+    const r = calc(c);
+    totalDue  += r.loanDue;
+    totalPaid += r.loanPaid;
+    totalDep  += r.depositBal;
+  });
+  document.getElementById('sTotalDue').textContent  = money(totalDue);
+  document.getElementById('sTotalPaid').textContent = money(totalPaid);
+  document.getElementById('sTotalDep').textContent  = money(totalDep);
+}
+
+// ── FAB ───────────────────────────────────────────────────────────────────────
+document.getElementById('fabBtn').onclick = () => {
+  document.getElementById('iName').value = '';
+  document.getElementById('iPhone').value = '';
+  openM('mAddC');
+  setTimeout(() => document.getElementById('iName').focus(), 250);
+};
+
+// ── ADD CUSTOMER ──────────────────────────────────────────────────────────────
+function addCustomer() {
+  const name = document.getElementById('iName').value.trim();
+  if (!name) { toast('⚠️ নাম লিখুন'); return; }
+  const phone = document.getElementById('iPhone').value.trim();
+  db.unshift({ id: uid(), name, phone, tx: [] });
+  save(); closeM('mAddC'); render();
+  toast('✅ গ্রাহক যোগ হয়েছে');
+}
+
+// ── DELETE ────────────────────────────────────────────────────────────────────
+function delCust(id) {
+  const c = db.find(x => x.id === id);
+  if (!c) return;
+  pendingDel = id;
+  document.getElementById('confMsg').textContent = `"${c.name}" এবং সকল লেনদেন মুছে যাবে।`;
+  document.getElementById('confOk').onclick = () => {
+    db = db.filter(x => x.id !== pendingDel);
+    if (openId === pendingDel) openId = null;
+    save(); closeM('mConf'); render();
+    toast('🗑️ মুছে গেছে');
+  };
+  openM('mConf');
+}
+
+// ── TRANSACTION ───────────────────────────────────────────────────────────────
+const txConfig = {
+  loan:     { title: '💸 ধার যোগ করুন',       btnBg: 'linear-gradient(135deg,#c0392b,#e74c3c)' },
+  payment:  { title: '✅ পরিশোধ যোগ করুন',      btnBg: 'linear-gradient(135deg,#059669,#10b981)' },
+  deposit:  { title: '💰 জমা যোগ করুন',         btnBg: 'linear-gradient(135deg,#6d28d9,#8b5cf6)' },
+  withdraw: { title: '🔄 জমা ফেরত দিন',          btnBg: 'linear-gradient(135deg,#b45309,#f59e0b)' },
+};
+function openTx(type, cid) {
+  curTxType = type; curCid = cid;
+  const cfg = txConfig[type];
+  document.getElementById('txMTitle').textContent = cfg.title;
+  document.getElementById('txOkBtn').style.background = cfg.btnBg;
+  document.getElementById('txAmt').value = '';
+  document.getElementById('txDate').value = today();
+  document.getElementById('txNote').value = '';
+  openM('mAddTx');
+  setTimeout(() => document.getElementById('txAmt').focus(), 250);
+}
+function addTx() {
+  const amt = parseFloat(document.getElementById('txAmt').value);
+  if (!amt || amt <= 0) { toast('⚠️ সঠিক পরিমাণ দিন'); return; }
+  const c = db.find(x => x.id === curCid);
+  if (!c) return;
+  c.tx.push({ id: uid(), type: curTxType, amt, date: document.getElementById('txDate').value || today(), note: document.getElementById('txNote').value.trim() });
+  save(); closeM('mAddTx'); render();
+  const msgs = { loan:'💸 ধার যোগ হয়েছে', payment:'✅ পরিশোধ হয়েছে', deposit:'💰 জমা যোগ হয়েছে', withdraw:'🔄 জমা ফেরত দেওয়া হয়েছে' };
+  toast(msgs[curTxType]);
+}
+
+// ── TOGGLE ────────────────────────────────────────────────────────────────────
+function toggle(id) {
+  openId = openId === id ? null : id;
+  render();
+  if (openId) setTimeout(() => {
+    const el = document.getElementById('cc-' + id);
+    if (el) el.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  }, 100);
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function render() {
+  updateSummary();
+  const q = document.getElementById('srchIn').value.trim().toLowerCase();
+  const list = document.getElementById('cList');
+  let filtered = db;
+  if (q) filtered = db.filter(c => c.name.toLowerCase().includes(q) || (c.phone||'').includes(q));
+
+  if (!filtered.length) {
+    list.innerHTML = db.length === 0
+      ? `<div class="empty"><div class="ei">📒</div><h3>কোনো গ্রাহক নেই</h3><p>➕ বাটন চেপে নতুন গ্রাহক যোগ করুন</p></div>`
+      : `<div class="no-res">🔍 কোনো গ্রাহক পাওয়া যায়নি</div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(c => {
+    const r = calc(c);
+    const isOpen = c.id === openId;
+
+    // balance row
+    let balHTML = '';
+    if (r.loanDue > 0) {
+      balHTML = `<div class="bal-row"><span class="bal-lbl">⚠️ এখনো পাওনা</span><span class="bal-val">${money(r.loanDue)}</span></div>`;
+    } else if (r.loanTotal > 0 && r.loanDue === 0) {
+      balHTML = `<div class="bal-row settled"><span class="bal-lbl">✅ সম্পূর্ণ পরিশোধ</span><span class="bal-val">পাওনা ০</span></div>`;
+    }
+    if (r.depositBal > 0) {
+      balHTML += `<div class="bal-row dep-bal"><span class="bal-lbl">💰 জমা বাকি আছে</span><span class="bal-val">${money(r.depositBal)}</span></div>`;
+    }
+
+    // stats
+    const hasDeposit = r.depositTotal > 0;
+    const statsHTML = `
+      <div class="c-stats">
+        <div class="st-item"><div class="st-lbl">💸 ধার</div><div class="st-val stv-loan">${money(r.loanTotal)}</div></div>
+        <div class="st-item"><div class="st-lbl">✅ পরিশোধ</div><div class="st-val stv-paid">${money(r.loanPaid)}</div></div>
+        <div class="st-item"><div class="st-lbl">${r.loanDue === 0 && r.loanTotal > 0 ? '🎉 বাকি' : '⚠️ বাকি'}</div><div class="st-val ${r.loanDue === 0 && r.loanTotal > 0 ? 'stv-zero' : 'stv-due'}">${money(r.loanDue)}</div></div>
+        ${hasDeposit ? `<div class="st-item" style="grid-column:1/-1;border-top:1px solid var(--border);padding-top:5px;margin-top:2px"><div class="st-lbl">💰 জমা মোট</div><div class="st-val stv-dep">${money(r.depositTotal)} → ফেরত ${money(r.depositWithdrawn)} → বাকি ${money(r.depositBal)}</div></div>` : ''}
+      </div>`;
+
+    // detail panel
+    let detailHTML = '';
+    if (isOpen) {
+      const txs = [...(c.tx || [])].sort((a,b) => new Date(b.date) - new Date(a.date));
+      const txIco = { loan:'💸', payment:'✅', deposit:'💰', withdraw:'🔄' };
+      const txLbl = { loan:'ধার', payment:'পরিশোধ', deposit:'জমা', withdraw:'জমা ফেরত' };
+      const txRows = txs.length === 0
+        ? `<div class="tx-empty">এখনো কোনো লেনদেন নেই</div>`
+        : txs.map(t => `
+          <div class="tx-item txi-${t.type}">
+            <div class="tx-l">
+              <div class="tx-ico">${txIco[t.type]||'📌'}</div>
+              <div>
+                <div class="tx-type">${txLbl[t.type]||t.type}${t.note ? ' — ' + t.note : ''}</div>
+                <div class="tx-date">${fmtD(t.date)}</div>
+              </div>
+            </div>
+            <div class="tx-r">
+              <div class="tx-amt">${money(t.amt)}</div>
+              <button class="tx-del" onclick="event.stopPropagation();delTx('${c.id}','${t.id}')" title="মুছুন">✕</button>
+            </div>
+          </div>`).join('');
+
+      detailHTML = `
+        <div class="d-panel">
+          ${balHTML}
+          <div class="d-hdr"><h3>📋 লেনদেনের ইতিহাস</h3><span>${BN(txs.length)} টি</span></div>
+          <div class="d-acts">
+            <button class="btn-act ba-loan" onclick="event.stopPropagation();openTx('loan','${c.id}')">💸 ধার</button>
+            <button class="btn-act ba-pay"  onclick="event.stopPropagation();openTx('payment','${c.id}')">✅ পরিশোধ</button>
+            <button class="btn-act ba-dep"  onclick="event.stopPropagation();openTx('deposit','${c.id}')">💰 জমা</button>
+          </div>
+          ${r.depositBal > 0 ? `
+          <div style="padding:8px 13px 0;display:grid;grid-template-columns:1fr;">
+            <button class="btn-act" style="background:linear-gradient(135deg,#b45309,#f59e0b);color:#fff;font-size:.78rem;" onclick="event.stopPropagation();openTx('withdraw','${c.id}')">🔄 জমা ফেরত দিন</button>
+          </div>` : ''}
+          <div class="tx-list">${txRows}</div>
+        </div>`;
+    }
+
+    return `
+      <div class="c-card${isOpen?' open':''}" id="cc-${c.id}">
+        <div class="c-top" onclick="toggle('${c.id}')">
+          <div class="c-info">
+            <div class="ava">${ini(c.name)}</div>
+            <div>
+              <div class="c-name">${c.name}
+                ${r.loanDue > 0 ? `<span class="type-tag tag-loan">পাওনা ${money(r.loanDue)}</span>` : ''}
+                ${r.depositBal > 0 ? `<span class="type-tag tag-deposit">জমা ${money(r.depositBal)}</span>` : ''}
+              </div>
+              <div class="c-phone">${c.phone ? '📱 ' + c.phone : 'ফোন নেই'}</div>
+            </div>
+          </div>
+          <div class="c-right">
+            <button class="btn-del" onclick="event.stopPropagation();delCust('${c.id}')">🗑️</button>
+            <span class="arr">${isOpen ? '▲' : '▼'}</span>
+          </div>
+        </div>
+        ${statsHTML}
+        ${detailHTML}
+      </div>`;
+  }).join('');
+}
+
+// ── DELETE TRANSACTION ───────────────────────────────────────────────────────
+function delTx(cid, txid) {
+  const c = db.find(x => x.id === cid);
+  if (!c) return;
+  const tx = c.tx.find(t => t.id === txid);
+  if (!tx) return;
+  const txLblMap = { loan:'ধার', payment:'পরিশোধ', deposit:'জমা', withdraw:'জমা ফেরত' };
+  document.getElementById('confMsg').textContent = `"${txLblMap[tx.type]||tx.type}" ${money(tx.amt)} — এই লেনদেন মুছে যাবে।`;
+  document.getElementById('confOk').onclick = () => {
+    c.tx = c.tx.filter(t => t.id !== txid);
+    save(); closeM('mConf'); render();
+    toast('🗑️ লেনদেন মুছে গেছে');
+  };
+  openM('mConf');
+}
+
+// ── ENTER KEYS ────────────────────────────────────────────────────────────────
+document.getElementById('iName').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('iPhone').focus(); });
+document.getElementById('iPhone').addEventListener('keydown', e => { if(e.key==='Enter') addCustomer(); });
+document.getElementById('txAmt').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('txDate').focus(); });
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+render();
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
